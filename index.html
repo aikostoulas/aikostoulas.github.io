@@ -153,8 +153,11 @@
     background: var(--surface); border-radius: 0 8px 8px 0;
     font-size: 15px; color: var(--muted);
   }
-  .credit { margin: 16px 0 0; font-size: 14px; color: var(--muted); }
-  .credit a { color: var(--accent); }
+  .section-note {
+    margin: 16px 0 0; padding: 12px 16px; font-size: 14px; line-height: 1.55; color: var(--muted);
+    background: var(--c-soft); border-radius: 8px;
+  }
+  .section-note a { color: var(--c); font-weight: 500; }
   footer {
     border-top: 1px solid var(--line); padding: 24px 0 40px;
     font-size: 14px; color: var(--muted);
@@ -215,6 +218,7 @@
       <!--
         To add a resource: copy a card into the right section.
         data-type controls the Type filter (use an existing value, or a new one to create a new chip).
+        Separate several types with "|", e.g. data-type="Self-assessment|Framework".
       -->
 
       <section class="topic al" id="applied-linguistics" data-topic="al" aria-labelledby="h-al">
@@ -223,8 +227,8 @@
           <p>What applied linguistics is, and how ideas about language, multilingualism and language policy bear on teaching.</p>
         </div>
         <div class="cards">
-          <a class="card" href="/AL-LE/what-is-applied-linguistics/" data-type="Activities">
-            <div class="tags"><span class="tag">Activities</span></div>
+          <a class="card" href="/AL-LE/what-is-applied-linguistics/" data-type="Self-study">
+            <div class="tags"><span class="tag">Self-study</span></div>
             <h3>What is applied linguistics?</h3>
             <p>A set of online activities built on Brumfit's definition of applied linguistics, with a printable summary of your work at the end.</p>
             <span class="go">Start the activities →</span>
@@ -244,8 +248,8 @@
           <p>Engaging with research in language education, based on the ReaLiTea Research Literacy Framework.</p>
         </div>
         <div class="cards">
-          <a class="card" href="/ReaLiTea/" data-type="Self-assessment">
-            <div class="tags"><span class="tag">Self-assessment</span><span class="tag project">ReaLiTea</span></div>
+          <a class="card" href="/ReaLiTea/" data-type="Self-assessment|Framework">
+            <div class="tags"><span class="tag">Self-assessment</span><span class="tag">Framework</span><span class="tag project">ReaLiTea</span></div>
             <h3>Research literacy self-assessment</h3>
             <p>Reflect on your research literacy one descriptor at a time, across the five facets of the ReaLiTea Research Literacy Framework and four levels from Initial to Established. Nothing is scored; you come away with a profile and a development plan of your own.</p>
             <span class="go">Start the self-assessment →</span>
@@ -263,6 +267,7 @@
             <span class="go">Open the companion →</span>
           </a>
         </div>
+        <p class="section-note">These resources were developed within <a href="https://www.realitea.info" target="_blank" rel="noopener">ReaLiTea (Research Literacy of Language Teachers)</a>, an Erasmus+ Cooperation Partnership co-funded by the European Union.</p>
       </section>
 
       <section class="topic ai" id="ai-literacy" data-topic="ai" aria-labelledby="h-ai">
@@ -284,6 +289,7 @@
             <span class="go">Open the worksheet →</span>
           </a>
         </div>
+        <p class="section-note">These resources draw on the work of the <a href="https://www.ecml.at" target="_blank" rel="noopener">AI Lang project</a> of the European Centre for Modern Languages (ECML). They are work in progress and may not have been reviewed or endorsed by the ECML.</p>
       </section>
 
       <div class="empty" id="empty" hidden>
@@ -291,8 +297,6 @@
       </div>
 
       <p class="note">Everything on these pages runs in your browser, and nothing you type is sent anywhere. Some resources save your progress in your own browser so you can come back to it later; each one also lets you save or export your work.</p>
-
-      <p class="credit">The ReaLiTea resources were developed within <a href="https://www.realitea.info" target="_blank" rel="noopener">ReaLiTea (Research Literacy of Language Teachers)</a>, an Erasmus+ Cooperation Partnership co-funded by the European Union.</p>
     </div>
   </main>
 
@@ -315,9 +319,10 @@
 
   // Build the Type chips from whatever types the cards declare, in page order.
   var types = [];
+  // A card can have several types, separated by "|" (e.g. data-type="Self-assessment|Framework").
+  function cardTypes(c) { return (c.getAttribute('data-type') || '').split('|').map(function (s) { return s.trim(); }).filter(Boolean); }
   cards.forEach(function (c) {
-    var t = c.getAttribute('data-type');
-    if (t && types.indexOf(t) === -1) types.push(t);
+    cardTypes(c).forEach(function (t) { if (types.indexOf(t) === -1) types.push(t); });
   });
   function makeChip(value, label) {
     var b = document.createElement('button');
@@ -341,7 +346,7 @@
       var topicOk = state.topic === 'all' || sec.getAttribute('data-topic') === state.topic;
       var visibleInSection = 0;
       sec.querySelectorAll('.card').forEach(function (card) {
-        var typeOk = state.type === 'all' || card.getAttribute('data-type') === state.type;
+        var typeOk = state.type === 'all' || cardTypes(card).indexOf(state.type) !== -1;
         var textOk = !needle || norm(card.textContent).indexOf(needle) !== -1;
         var ok = topicOk && typeOk && textOk;
         card.hidden = !ok;
